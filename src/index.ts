@@ -4,6 +4,7 @@ import express from "express";
 
 import { Server } from 'socket.io'
 import http from 'http'
+import UserService from "@/service/UserService";
 
 
 import { name } from "@/utils";
@@ -18,6 +19,10 @@ const server = http.createServer(app)
 
 // 传入 serve 建立 Socket 
 const io = new Server(server)
+
+const userService = new UserService()
+
+
 
 
 // 建立连接 
