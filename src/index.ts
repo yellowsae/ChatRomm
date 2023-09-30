@@ -37,7 +37,14 @@ io.on('connection', (socket) => {
     // console.log('serve ', msg)
     // 接收到 msg 信息后， 把 msg 发送给前端 
     // 使用 io 
-    io.emit('chat', msg)
+    // io.emit('chat', msg)
+
+    // 获取当前用户，区分不同聊天室
+    const userData = userService.getUser(socket.id)
+    if (userData) {
+      // 使用 io.to  方法 区分不同聊天室，再发出 msg
+      io.to(userData.roomName).emit('chat', msg)
+    }
   })
 
 
@@ -60,6 +67,7 @@ io.on('connection', (socket) => {
     // io.emit('join', `${userName} 加入了${className}聊天室`)
 
     // 再使用 socket.broadcast.to (房间名). emit 方法传出 msg 
+    // broadcast 加入后别人能够看到你加入的信息，而自己看不到自己加入的信息
     socket.broadcast.to(userData.roomName).emit('join', `${userName} 加入了${className}聊天室`)
   })
 
