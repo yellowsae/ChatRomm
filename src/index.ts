@@ -39,6 +39,42 @@ io.on('connection', (socket) => {
     // 使用 io 
     io.emit('chat', msg)
   })
+
+
+
+  // 监听 谁 加入聊天室 
+
+  socket.on('join', ({ userName, className }) => {
+    // 记录用户状态  id: 可以使用 socket.id 
+    const userData = userService.userHandler(socket.id, className, userName)
+    // 添加 
+    userService.addUser(userData)
+
+    // 再使用 io 传出 msg
+    io.emit('join', `${userName} 加入了${className}聊天室`)
+  })
+
+
+
+  // 监听断开连接的事件 
+  // 原本在 socket 有 这个事件 
+  socket.on('disconnect', () => {
+    // console.log('用户离开了聊天室')
+
+    // 取出用户信息
+    const userData = userService.getUser(socket.id)
+    console.log(socket.id)
+
+    const userName = userData?.userName
+    console.log(userData, 'asd')
+    if (userName) {
+      io.emit('leave', `${userName}离开了聊天室`)
+    }
+
+    // 根据id 参数用户 
+    userService.removeUser(socket.id)
+  })
+
 })
 
 

@@ -38,6 +38,7 @@ export default class UserService {
     // }
 
     const data = this.userMap.get(id)
+
     if (data) {
       return data
     }

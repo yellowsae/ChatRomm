@@ -2,17 +2,26 @@ import "./index.css";
 
 import { io } from "socket.io-client";
 
+
+// 初始化 Socket.io
+// 客户端的 Socket.io
+const clientIo = io();
+
 // location 当前的 URL
 const url = new URL(location.href)
 
 // 获取参数 
-const userInput = url.searchParams.get('user_input')
-const userSelect = url.searchParams.get('use_select')
+const userName = url.searchParams.get('user_input')
+const className = url.searchParams.get('use_select')
 
 
-if (!userInput || !userSelect) {
+if (!userName || !className) {
   location.href = `/main/main.html`
 }
+
+
+// 发起谁加入聊天室的 emit 
+clientIo.emit('join', { userName, className })
 
 
 
@@ -20,11 +29,11 @@ if (!userInput || !userSelect) {
 const textInput = document.getElementById('textInput') as HTMLInputElement
 const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement
 const chatBox = document.getElementById('chatBox') as HTMLDivElement
-const roomName = document.getElementById('roomName') as HTMLParagraphElement
+const rootName = document.getElementById('roomName') as HTMLParagraphElement
 const back = document.getElementById('back') as HTMLButtonElement
 
 
-roomName.innerHTML = userSelect || ' - '
+rootName.innerHTML = className || ' - '
 
 // 处理后端传过来的 msg
 function msgHandler(msg: string) {
@@ -54,10 +63,23 @@ function msgHandler(msg: string) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+function joinHandler(msg: string) {
 
-// 初始化 Socket.io
-// 客户端的 Socket.io
-const clientIo = io();
+  // 创建 div 
+  const divBox = document.createElement('div')
+  divBox.classList.add('flex', 'justify-center', 'mb-4', 'items-center')
+
+  // 构建结构
+  divBox.innerHTML = `
+  <p class="text-gray-700 text-sm">${msg}</p>
+  `
+
+  // 添加到 chatBox
+  chatBox.appendChild(divBox)
+  // 自动滚动到底部
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
 
 submitBtn.addEventListener('click', () => {
   // 获取数据 
@@ -78,6 +100,17 @@ clientIo.on('chat', (msg) => {
   msgHandler(msg)
 })
 
+
+// 加入聊天室 
+clientIo.on('join', (msg) => {
+  // 执行函数 处理 msg
+  joinHandler(msg)
+})
+
+// 离开聊天室 
+clientIo.on('leave', (msg) => {
+  joinHandler(msg)
+})
 
 
 back.addEventListener('click', () => {
