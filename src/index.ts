@@ -5,7 +5,7 @@ import express from "express";
 import { Server } from 'socket.io'
 import http from 'http'
 import UserService from "@/service/UserService";
-
+import moment from "moment";
 
 import { name } from "@/utils";
 
@@ -41,12 +41,15 @@ io.on('connection', (socket) => {
     // 使用 io 
     // io.emit('chat', msg)
 
+    // 返回时区 
+    const time = moment.utc()
+
     // 获取当前用户，区分不同聊天室
     const userData = userService.getUser(socket.id)
     if (userData) {
       // 使用 io.to  方法 区分不同聊天室，再发出 msg
       // 传出用户信息和 msg 
-      io.to(userData.roomName).emit('chat', { userData, msg })
+      io.to(userData.roomName).emit('chat', { userData, msg, time })
     }
   })
 

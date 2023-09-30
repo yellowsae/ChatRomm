@@ -4,7 +4,8 @@ import { io } from "socket.io-client";
 
 interface ChatData {
   msg: string,
-  userData: userData
+  userData: userData,
+  time: number
 }
 
 // 初始化 Socket.io
@@ -45,6 +46,10 @@ let userID = ''
 // 处理后端传过来的 msg
 function msgHandler(data: ChatData) {
 
+  // 处理 time 
+  const date = new Date(data.time)
+  const time = `${date.getHours()}:${date.getMinutes()}`
+
   // 创建 div 
   const divBox = document.createElement('div')
   divBox.classList.add('flex', 'mb-4', 'items-end')
@@ -54,7 +59,7 @@ function msgHandler(data: ChatData) {
     // 构建结构
     divBox.classList.add('justify-end')
     divBox.innerHTML = `
-    <p class="text-xs text-gray-700 mr-4">00:00</p>
+    <p class="text-xs text-gray-700 mr-4">${time}</p>
     <div>
       <p class="text-xs text-white mb-1 text-right">${data.userData.userName}</p>
       <p
@@ -75,7 +80,7 @@ function msgHandler(data: ChatData) {
           ${data.msg}
         </p>
       </div>
-      <p class="text-xs text-gray-700 ml-4">00:00</p>
+      <p class="text-xs text-gray-700 ml-4">${time}</p>
     `
   }
 
