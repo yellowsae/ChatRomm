@@ -1,7 +1,11 @@
 import "./index.css";
-
+import type { userData } from "@/service/UserService";
 import { io } from "socket.io-client";
 
+interface ChatData {
+  msg: string,
+  userData: userData
+}
 
 // 初始化 Socket.io
 // 客户端的 Socket.io
@@ -35,25 +39,47 @@ const back = document.getElementById('back') as HTMLButtonElement
 
 rootName.innerHTML = className || ' - '
 
+// 定义 存储 ID 的变量 
+let userID = ''
+
 // 处理后端传过来的 msg
-function msgHandler(msg: string) {
+function msgHandler(data: ChatData) {
 
   // 创建 div 
   const divBox = document.createElement('div')
-  divBox.classList.add('flex', 'justify-end', 'mb-4', 'items-end')
+  divBox.classList.add('flex', 'mb-4', 'items-end')
 
-  // 构建结构
-  divBox.innerHTML = `
+  // 根据ID判断是否是自己消息 | 其他用户消息 
+  if (userID === data.userData.id) {
+    // 构建结构
+    divBox.classList.add('justify-end')
+    divBox.innerHTML = `
     <p class="text-xs text-gray-700 mr-4">00:00</p>
     <div>
-      <p class="text-xs text-white mb-1 text-right">Bruce</p>
+      <p class="text-xs text-white mb-1 text-right">${data.userData.userName}</p>
       <p
         class="mx-w-[50%] break-all bg-white px-4 py-2 rounded-bl-full rounded-br-full rounded-tl-full"
       >
-        ${msg}
+        ${data.msg}
       </p>
     </div>
   `
+  } else {
+    divBox.classList.add('justify-start')
+    divBox.innerHTML = `
+      <div>
+        <p class="text-xs text-gray-700 mb-1">${data.userData.userName}</p>
+        <p
+          class="mx-w-[50%] break-all bg-gray-800 px-4 py-2 rounded-tr-full rounded-br-full rounded-tl-full text-white"
+        >
+          ${data.msg}
+        </p>
+      </div>
+      <p class="text-xs text-gray-700 ml-4">00:00</p>
+    `
+  }
+
+
 
   // 添加到 chatBox
   chatBox.appendChild(divBox)
@@ -94,10 +120,10 @@ submitBtn.addEventListener('click', () => {
 
 // 接收 chat 频道，后端传过来的 msg
 
-clientIo.on('chat', (msg) => {
+clientIo.on('chat', (data: ChatData) => {
   // console.log('cline chat', msg)
   // 执行函数，处理 msg 
-  msgHandler(msg)
+  msgHandler(data)
 })
 
 
@@ -110,6 +136,11 @@ clientIo.on('join', (msg) => {
 // 离开聊天室 
 clientIo.on('leave', (msg) => {
   joinHandler(msg)
+})
+
+// 获取 传入的 socket.id 
+clientIo.on('chatID', (id) => {
+  userID = id
 })
 
 

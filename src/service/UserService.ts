@@ -1,6 +1,6 @@
 // 记录 用户状态 
 
-interface userData {
+export interface userData {
   id: string;
   roomName: string;
   userName: string;

@@ -30,6 +30,8 @@ io.on('connection', (socket) => {
   // connetion : 连接事件
   // socket 参数： websocket 实例 
 
+  // 传入 socket.id 传入到前端 , 根据 ID 判断不同用户
+  socket.emit('chatID', socket.id)
 
 
   // 监听 chat 这个频道 
@@ -43,7 +45,8 @@ io.on('connection', (socket) => {
     const userData = userService.getUser(socket.id)
     if (userData) {
       // 使用 io.to  方法 区分不同聊天室，再发出 msg
-      io.to(userData.roomName).emit('chat', msg)
+      // 传出用户信息和 msg 
+      io.to(userData.roomName).emit('chat', { userData, msg })
     }
   })
 
