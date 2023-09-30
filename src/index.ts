@@ -47,11 +47,20 @@ io.on('connection', (socket) => {
   socket.on('join', ({ userName, className }) => {
     // 记录用户状态  id: 可以使用 socket.id 
     const userData = userService.userHandler(socket.id, className, userName)
+
+
+    // 区分不同房间 
+    // 使用 socket 的 join 方法 开启不同的空间 
+    socket.join(userData.roomName)
+
     // 添加 
     userService.addUser(userData)
 
     // 再使用 io 传出 msg
-    io.emit('join', `${userName} 加入了${className}聊天室`)
+    // io.emit('join', `${userName} 加入了${className}聊天室`)
+
+    // 再使用 socket.broadcast.to (房间名). emit 方法传出 msg 
+    socket.broadcast.to(userData.roomName).emit('join', `${userName} 加入了${className}聊天室`)
   })
 
 
@@ -63,12 +72,14 @@ io.on('connection', (socket) => {
 
     // 取出用户信息
     const userData = userService.getUser(socket.id)
-    console.log(socket.id)
 
     const userName = userData?.userName
-    console.log(userData, 'asd')
     if (userName) {
-      io.emit('leave', `${userName}离开了聊天室`)
+
+      // io.emit('leave', `${userName}离开了聊天室`)
+
+      // 改为不同聊天室的空间 
+      socket.broadcast.to(userData?.roomName).emit('leave', `${userName}离开了${userData.roomName}聊天室`)
     }
 
     // 根据id 参数用户 
