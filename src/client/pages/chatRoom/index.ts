@@ -2,13 +2,6 @@ import "./index.css";
 
 import { io } from "socket.io-client";
 
-
-
-
-
-// http://localhost:3000/chatRoom/chatRoom.html?user_input=userName&use_select=ROOM3
-// 获取URL的参数 
-
 // location 当前的 URL
 const url = new URL(location.href)
 
@@ -21,16 +14,72 @@ if (!userInput || !userSelect) {
   location.href = `/main/main.html`
 }
 
-console.log(userInput, userSelect)
+
+
+
+const textInput = document.getElementById('textInput') as HTMLInputElement
+const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement
+const chatBox = document.getElementById('chatBox') as HTMLDivElement
+const roomName = document.getElementById('roomName') as HTMLParagraphElement
+const back = document.getElementById('back') as HTMLButtonElement
+
+
+roomName.innerHTML = userSelect || ' - '
+
+// 处理后端传过来的 msg
+function msgHandler(msg: string) {
+
+  // 创建 div 
+  const divBox = document.createElement('div')
+  divBox.classList.add('flex', 'justify-end', 'mb-4', 'items-end')
+
+  // 构建结构
+  divBox.innerHTML = `
+    <p class="text-xs text-gray-700 mr-4">00:00</p>
+    <div>
+      <p class="text-xs text-white mb-1 text-right">Bruce</p>
+      <p
+        class="mx-w-[50%] break-all bg-white px-4 py-2 rounded-bl-full rounded-br-full rounded-tl-full"
+      >
+        ${msg}
+      </p>
+    </div>
+  `
+
+  // 添加到 chatBox
+  chatBox.appendChild(divBox)
+  // 清空 textValue 
+  textInput.value = ''
+  // 自动滚动到底部
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
 
 
 // 初始化 Socket.io
 // 客户端的 Socket.io
+const clientIo = io();
 
-const socket = io();
+submitBtn.addEventListener('click', () => {
+  // 获取数据 
+  const textValue = textInput.value
+  // 使用 socket.emit 发送消息 
+  // 建立频道 
+  // - 前端推送数据给后端， 
+  // 后端接收, 然后再返回数据给前端 
+  clientIo.emit('chat', textValue)  // chat 频道
+})
+
+
+// 接收 chat 频道，后端传过来的 msg
+
+clientIo.on('chat', (msg) => {
+  // console.log('cline chat', msg)
+  // 执行函数，处理 msg 
+  msgHandler(msg)
+})
 
 
 
-socket.on("join", (msg) => {
-  console.log(msg);
-});
+back.addEventListener('click', () => {
+  location.href = `/main/main.html`
+})

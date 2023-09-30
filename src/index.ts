@@ -25,10 +25,15 @@ io.on('connection', (socket) => {
   // connetion : 连接事件
   // socket 参数： websocket 实例 
 
-  // 监听事件  emit  - join 
-  socket.emit("join", "welcome");
 
 
+  // 监听 chat 这个频道 
+  socket.on('chat', (msg) => {
+    // console.log('serve ', msg)
+    // 接收到 msg 信息后， 把 msg 发送给前端 
+    // 使用 io 
+    io.emit('chat', msg)
+  })
 })
 
 
